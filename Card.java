@@ -9,8 +9,10 @@ public class Card extends JButton {
     this.name = name;
     this.setActionCommand(Integer.toString(id));
     this.state = State.NOT_FLIPPED;
+    backFace = new ImageIcon("cardBack.png");
+    this.setIcon(backFace);
   }
-  
+
   public void setState(State state) {
     this.state = state;
   }
@@ -35,6 +37,14 @@ public class Card extends JButton {
     this.name = name;
   }
 
+  public ImageIcon getCardFace(){
+	  return cardFace;
+  }
+
+  public void setCardFace(ImageIcon cardFace) {
+	  this.cardFace = cardFace;
+  }
+
   @Override
   public String toString() {
     if(state == State.NOT_FLIPPED) {
@@ -46,11 +56,12 @@ public class Card extends JButton {
 
   public void flip() {
     if(this.state == State.NOT_FLIPPED) {
-      this.setText(name);
+      this.setIcon(cardFace);
+      System.out.println(cardFace);
       this.state = State.FLIPPED;
     } else {
-      this.setText("");
       this.state = State.NOT_FLIPPED;
+      this.setIcon(backFace);
     }
   }
 
@@ -71,7 +82,8 @@ public class Card extends JButton {
 
     int state;
   };
-
+  private ImageIcon cardFace;
+  private ImageIcon backFace;
   private int id;
   private String name;
   private State state;

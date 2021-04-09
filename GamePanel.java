@@ -2,7 +2,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.*;
-
 import java.awt.*;
 
 public class GamePanel extends JPanel{
@@ -10,9 +9,8 @@ public class GamePanel extends JPanel{
   static int columns = 5;
   static int totalCards = rows*columns;
 
-
-
   AtomicBoolean mismatchCardsWaiting;
+  boolean gameStarted;
 
   Card[] cards;
   Card lastFlippedCard;
@@ -24,6 +22,7 @@ public class GamePanel extends JPanel{
   JPanel sidePanel;
   ImageIcon[] faces = new ImageIcon[10];
 
+  StopwatchPanel stopwatchPanel;
 
   GamePanel() {
     this.setSize(800, 600);
@@ -39,6 +38,7 @@ public class GamePanel extends JPanel{
     faces[7] = new ImageIcon("pansie.png");
     faces[8] = new ImageIcon("tansy.png");
     faces[9] = new ImageIcon("poppy.png");
+    
     // This variable is used to block the input from the user when mismatched
     // pair is clicked.
     mismatchCardsWaiting = new AtomicBoolean();
@@ -48,23 +48,26 @@ public class GamePanel extends JPanel{
     addCards();
     boardPanel.setBorder(null);
     boardPanel.setFocusable(false);
-    
 	  boardPanel.setBackground(new Color(230, 162, 46));
+
+    stopwatchPanel = new StopwatchPanel();
+
     resetButton = new JButton("New game");
     resetButton.addActionListener(l -> {
       resetGame();
     });
     resetButton.setBackground(new Color(232, 197, 109));
     resetButton.setFocusable(false);
+    resetButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
     scoreLabel = new JLabel();
-
+    scoreLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
     sidePanel = new JPanel();
+    sidePanel.add(stopwatchPanel);
     sidePanel.add(resetButton);
     sidePanel.add(scoreLabel);
     sidePanel.setLayout(new BoxLayout(sidePanel, BoxLayout.Y_AXIS));
-
 
     this.add(boardPanel);
     this.add(sidePanel);
@@ -81,13 +84,7 @@ public class GamePanel extends JPanel{
       // Cards will get name when the game is reset
       cards[i] = new Card(i, "");
       cards[i].setBackground(new Color(230, 162, 46));
-      // There are 20 cards (10 pairs). For each pair we assign the same faces
-      // i-th card should have face of i/2
-      // for example, cards 0 and 1 should have face 0
-      //              cards 2 and 3 should have face 1, etc.
-      // There cards are shuffled later when the game is reset
-
-
+      
       // This is the callback function for clicking
       cards[i].addActionListener(e -> {
         int cardID = Integer.parseInt(e.getActionCommand());
@@ -99,6 +96,12 @@ public class GamePanel extends JPanel{
   }
 
   private void onCardClick(Card clickedCard) {
+    // If the game isn't started and a card is clicked, then start the timer
+    if(!gameStarted) {
+      gameStarted = true;
+      stopwatchPanel.start();
+    }
+
     // Block any click input from user when we are waiting for mismatched pair
     // to flip
     if(mismatchCardsWaiting.get() == true) {
@@ -145,15 +148,22 @@ public class GamePanel extends JPanel{
 
   private void resetGame() {
     mismatchCardsWaiting.set(false);
+    gameStarted = false;
+
+    // Flip all face-up cards to face-down
     for(int i = 0 ; i < totalCards ; i++) {
       if(cards[i].getState() == Card.State.FLIPPED) {
         cards[i].flip();
       }
     }
 
+    // Reset the stopwatch
+    stopwatchPanel.reset();
+
     lastFlippedCard = null;
     pairsLeftCount = totalCards / 2;
 
+    // Shuffle the cards' name
     ArrayList<Integer> cardPairIDs = new ArrayList<Integer>();
     for(int i = 0 ; i < totalCards ; i++) {
       cardPairIDs.add(i/2);
@@ -162,7 +172,6 @@ public class GamePanel extends JPanel{
     for(int i = 0 ; i < totalCards ; i++) {
       cards[i].setName(Integer.toString(cardPairIDs.get(i)));
       cards[i].setCardFace(faces[cardPairIDs.get(i)]);
-
     }
 
     scoreLabel.setText(String.format("%d pairs left", pairsLeftCount));
@@ -178,5 +187,6 @@ public class GamePanel extends JPanel{
 
   private void onFinish() {
     scoreLabel.setText(String.format("You win"));
+    stopwatchPanel.stop();
   }
 }

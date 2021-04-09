@@ -2,6 +2,12 @@ import javax.swing.*;
 import java.awt.Dimension;
 
 public class Card extends JButton {
+  private ImageIcon cardFace;
+  private ImageIcon backFace;
+  private int id;
+  private String name;
+  private State state;
+  
   Card(int id, String name) {
     this.setPreferredSize(new Dimension(120, 120));
 
@@ -9,6 +15,7 @@ public class Card extends JButton {
     this.name = name;
     this.setActionCommand(Integer.toString(id));
     this.state = State.NOT_FLIPPED;
+  
     backFace = new ImageIcon("cardBack.png");
     this.setIcon(backFace);
   }
@@ -81,9 +88,4 @@ public class Card extends JButton {
 
     int state;
   };
-  private ImageIcon cardFace;
-  private ImageIcon backFace;
-  private int id;
-  private String name;
-  private State state;
 }

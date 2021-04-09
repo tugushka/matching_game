@@ -57,11 +57,10 @@ public class Card extends JButton {
   public void flip() {
     if(this.state == State.NOT_FLIPPED) {
       this.setIcon(cardFace);
-      System.out.println(cardFace);
       this.state = State.FLIPPED;
     } else {
-      this.state = State.NOT_FLIPPED;
       this.setIcon(backFace);
+      this.state = State.NOT_FLIPPED;
     }
   }
 
